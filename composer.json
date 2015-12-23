@@ -1,0 +1,15 @@
+{
+    "name": "smeagol07/padawan-magento",
+    "description": "Magento plugin for padawan.php",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {"Smeagol07\\PadawanMagento\\": "src/"}
+    },
+    "authors": [
+        {
+            "name": "Pawel Bogut",
+            "email": "pawel.bogut@gmail.com"
+        }
+    ],
+    "require": {}
+}
