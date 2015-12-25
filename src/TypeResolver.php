@@ -35,7 +35,8 @@ class TypeResolver
         if ($chain->getType() === 'method' && $chain->getName() == 'padawan_refresh') {
             Indexer::getInstance()->refresh();
         }
-        if ($chain->getType() === 'method' && count($chain->getArgs()) > 0) {
+        $args = $chain->getArgs();
+        if ($chain->getType() === 'method' && count($args) > 0) {
             switch ($chain->getName()) {
                 case 'helper': //Mage::helper()
                     $this->handleType(Indexer::TYPE_HELPER, $e, $project);
