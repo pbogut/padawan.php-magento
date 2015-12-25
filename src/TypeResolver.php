@@ -38,15 +38,16 @@ class TypeResolver
         if ($chain->getType() === 'method' && count($chain->getArgs()) > 0) {
             switch ($chain->getName()) {
                 case 'helper': //Mage::helper()
-                    $this->handleHelper($e, $project);
+                    $this->handleType(Indexer::TYPE_HELPER, $e, $project);
                     break;
                 case 'getSingleton': //Mage::getSingleton()
                     //no break;
                 case 'getModel': //Mage::gerModel()
-                    //not implemented yet!
+                    $this->handleType(Indexer::TYPE_MODEL, $e, $project);
+                    break;
                 break;
                 case 'getResourceModel': //Mage::gerResourceModel()
-                    //not implemented yet!
+                    $this->handleType(Indexer::TYPE_RESURCE_MODEL, $e, $project);
                     break;
                 case 'getStoreConfig': //Mage::getStoreConfig()
                     //no break;
@@ -62,7 +63,7 @@ class TypeResolver
         return $this->parentType;
     }
 
-    protected function handleHelper(TypeResolveEvent $e, Project $project) {
+    protected function handleType($type, TypeResolveEvent $e, Project $project) {
         $chain = $e->getChain();
 
         $firstArg = array_pop($chain->getArgs())->value;
@@ -71,7 +72,7 @@ class TypeResolver
             break; //no string so bye bye
         }
 
-        $result = Indexer::getInstance()->getGroup(Indexer::TYPE_HELPER);
+        $result = Indexer::getInstance()->getGroup($type);
 
         $helperName = $firstArg->value;
 

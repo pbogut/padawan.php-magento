@@ -1,26 +1,31 @@
 <?php
 
-function start($path, $action) {
+function start($path, $file = null) {
     $mageFile = "{$path}/app/Mage.php";
     if(!file_exists($mageFile)) {
-        die("\nWrong magento path. File {$mageFile} not found.");
+        die(json_encode(array(
+            'success' => false,
+            'message' => "Wrong magento path. File {$mageFile} not found."
+        )));
     }
     require $mageFile;
     Mage::app();
     session_start();
 
-    switch ($action) {
-        case 'resource_models':
-            throw new Exception('Not implemented yet!');
-        case 'models':
-            throw new Exception('Not implemented yet!');
-        case 'configs':
-            throw new Exception('Not implemented yet!');
-        case 'helpers':
-            handleHelpers();
-        break;
+    $result = array();
+
+    if ($file === null) {
+        $config = Mage::getConfig()->loadModulesConfiguration('config.xml');
+    } else {
+        $config = Mage::getConfig()->loadFile($file);
     }
 
+    die(json_encode(array(
+        'success' => true,
+        'models' => handleModels($config),
+        'resource_models' => handleResources($config),
+        'helpers' => handleHelpers($config),
+    )));
 }
 
 function getDirContents($dir, &$results = array()){
@@ -39,19 +44,94 @@ function getDirContents($dir, &$results = array()){
     return $results;
 }
 
-function handleHelpers() {
-    $config = Mage::getConfig()->loadModulesConfiguration('config.xml');
-    foreach ($config->getnode('global/helpers')->asArray() as $name => $data) {
-        if (isset($data['class']))
-        echo("{$name}:{$data['class']}\n");
+function arrayToString($array) {
+    $output = array();
+    foreach($array as $key => $row) {
+        $output[] = "{$key}:{$row}";
     }
-    echo("core:Mage_Core_Helper\n"); //for some reason its not in magento config files
+    return implode("\n", $output);
+}
+
+function handleModels($config) {
+    $resourceModels = array();
+    $models = array();
+
+    foreach ($config->getNode()->xpath('global/models/*') as $element) {
+        $name = $element->getName();
+        $isResource = !!count($config->getNode()->xpath("global/models/*/resourceModel[.='{$name}']"));
+        $namespace = (string) $element->class;
+        if (!$isResource) {
+            $resourceModels[$name] = $namespace;
+        }
+    }
+
+    $resourceModels['core'] = 'Mage_Core_Model';
+    unset($resourceModels['core_resource']);
+
+    return $resourceModels;
+}
+
+function handleDeprecatedResources($config) {
+    $resourceModels = array();
+
+    foreach ($config->getNode()->xpath('global/models/*[resourceModel]') as $element) {
+        $namespace = (string) current(
+            $config->getNode()->xpath("global/models/{$element->resourceModel}/class")
+        );
+        $depricated = (string) current(
+            $config->getNode()->xpath("global/models/{$element->resourceModel}/class")
+        );
+        if (!$namespace) {
+            continue;
+        }
+        $name = $element->getName();
+
+        $resourceModels[$name] = $namespace;
+    }
+
+    $resourceModels['core'] = 'Mage_Core_Model_Resource';
+
+    return $resourceModels;
+}
+
+function handleResources($config) {
+    $resourceModels = array();
+
+    foreach ($config->getNode()->xpath('global/models/*[resourceModel]') as $element) {
+        $namespace = (string) current(
+            $config->getNode()->xpath("global/models/{$element->resourceModel}/class")
+        );
+        if (!$namespace) {
+            continue;
+        }
+        $name = $element->getName();
+
+        $resourceModels[$name] = $namespace;
+    }
+
+    $resourceModels['core'] = 'Mage_Core_Model_Resource';
+
+    return $resourceModels;
+}
+
+function handleHelpers($config) {
+    foreach ($config->getNode('global/helpers')->asArray() as $name => $data) {
+        if (isset($data['class'])) {
+            $helpers[$name] = $data['class'];
+        }
+    }
+    $helpers['core'] = 'Mage_Core_Helper'; //for some reason its not in magento config files
+
+    return $helpers;
 }
 
 // var_dump($argv, $argc);
-$path = @$argv[1];
-$action = @$argv[2];
-if (!$path || !$action) {
-    die("\nUsage: php {$argv[0]} <magento_path> <action>");
+$path = isset($argv[1]) ? $argv[1] : null;
+$file = isset($argv[2]) ? $argv[2] : null;
+if (!$path) {
+    die(json_encode(array(
+        'success' => false,
+        'message' => "Usage: php {$argv[0]} <magento_path> [xml_file]"
+    )));
 }
-start($path, $action);
+start($path, $file);

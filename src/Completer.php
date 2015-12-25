@@ -17,15 +17,13 @@ class Completer implements CompleterInterface
 
         switch ($methodName) {
             case 'helper':
-                return $this->handleHelper();
+                return $this->handleType(Indexer::TYPE_HELPER);
             case 'getSingleton': //Mage::getSingleton()
                 //no break;
             case 'getModel': //Mage::gerModel()
-                //not implemented yet!
-                break;
+                return $this->handleModel();
             case 'getResourceModel': //Mage::gerResourceModel()
-                //not implemented yet!
-                break;
+                return $this->handleType(Indexer::TYPE_RESURCE_MODEL);
             case 'getStoreConfig': //Mage::getStoreConfig()
                 //no break;
             case 'getStoreConfigFlag': //Mage::getStoreConfigFlag()
@@ -35,9 +33,27 @@ class Completer implements CompleterInterface
 
     }
 
-    protected function handleHelper() {
-        $result = Indexer::getInstance()->getGroup(Indexer::TYPE_HELPER);
-        var_dump($result);
+    protected function handleModel() {
+        $result = Indexer::getInstance()->getGroup(Indexer::TYPE_MODEL);
+        $result = array_keys($result);
+        $result = array_filter($result, function ($serviceName) use ($result) {
+            //skip depricated nodes, type still will be resolved
+            return (strpos($serviceName, '/mysql4') === false);
+        });
+
+        return array_map(function ($serviceName) {
+            return new Entry(
+                sprintf('\'%s\'', $serviceName),
+                '',
+                '',
+                $serviceName
+            );
+        }, $result);
+
+    }
+
+    protected function handleType($type) {
+        $result = Indexer::getInstance()->getGroup(Indexer::TYPE_RESURCE_MODEL);
 
         return array_map(function ($serviceName) {
             return new Entry(
@@ -48,4 +64,6 @@ class Completer implements CompleterInterface
             );
         }, array_keys($result));
     }
+
+
 }

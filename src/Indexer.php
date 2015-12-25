@@ -15,6 +15,8 @@ namespace Smeagol07\PadawanMagento;
 class Indexer {
 
     const TYPE_HELPER = 'helpers';
+    const TYPE_MODEL = 'models';
+    const TYPE_RESURCE_MODEL = 'resource_models';
 
     protected static $_instance = null;
 
@@ -54,25 +56,42 @@ class Indexer {
     public function getData($refresh = false) {
         $classMap = $this->getProject()->getIndex()->getClassMap();
         if ($this->data === null || $refresh === true) {
-            exec(sprintf('php %s/mage.php %s helpers', dirname(__FILE__), $this->getProject()->getRootFolder()), $output);
-            $result = array();
-            foreach ($output as $line) {
-                if(!$line) {
-                    break;
-                }
+            exec(sprintf('php %s/mage.php %s', dirname(__FILE__), $this->getProject()->getRootFolder()), $output);
+            $options = json_decode(implode('', $output), true);
 
-                list($helperXmlKey, $namespace) = explode(':', $line, 2);
+            if (!isset($options['success']) || !$options['success']) {
+                return $this->data;
+            }
 
-                foreach ($classMap as $className => $_) {
-                    if (strpos($className, $namespace) === 0) { //if more helpers in that namespace
-                        $name = $this->getHelperName($helperXmlKey, $namespace, $className);
-                        $result[$name] = $className;
+            foreach([self::TYPE_HELPER, self::TYPE_RESURCE_MODEL, self::TYPE_MODEL] as $type) {
+                $this->data[$type] = isset($this->data[$type]) ? $this->data[$type] : array();
+                uksort($options[$type], function($a, $b) {
+                    return ($a == $b) ? 0 : ($a > $b ? -1 : 1);
+                });
+                foreach ($options[$type] as $helperXmlKey => $namespace) {
+                    foreach ($classMap as $className => $_) {
+                        if (strpos($className, $namespace) === 0 && !$this->isClassInMaped($className)) {
+                            $name = $this->getFactoryName($helperXmlKey, $namespace, $className);
+                            $this->data[$type][$name] = $className;
+                        }
                     }
                 }
             }
-            $this->data[self::TYPE_HELPER] = $result;
+
         }
         return $this->data;
+    }
+
+    protected function isClassInMaped($className) {
+        $isInMap = false;
+        foreach ($this->data as $group => $classList) {
+            if (in_array($className, $classList)) {
+                $isInMap = true;
+                break;
+            }
+        }
+
+        return $isInMap;
     }
 
     public static function getInstance() {
@@ -83,7 +102,7 @@ class Indexer {
         return self::$_instance;
     }
 
-    protected function getHelperName($helperXmlKey, $namespace, $className) {
+    protected function getFactoryName($helperXmlKey, $namespace, $className) {
         $name = $helperXmlKey;
         $result = array();
         $classEnding = substr($className, strlen($namespace)+1);
