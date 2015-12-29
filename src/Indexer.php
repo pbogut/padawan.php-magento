@@ -70,6 +70,9 @@ class Indexer {
                 });
                 foreach ($options[$type] as $helperXmlKey => $namespace) {
                     foreach ($classMap as $className => $_) {
+                        if (!$namespace) {
+                            continue;
+                        }
                         if (strpos($className, $namespace) === 0 && !$this->isClassInMaped($className)) {
                             $name = $this->getFactoryName($helperXmlKey, $namespace, $className);
                             $this->data[$type][$name] = $className;
