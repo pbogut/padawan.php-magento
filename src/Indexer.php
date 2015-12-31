@@ -54,7 +54,7 @@ class Indexer {
     }
 
     public function getData($refresh = false) {
-        $classMap = $this->getProject()->getIndex()->getClassMap();
+        $classMap = $this->getProject()->getIndex()->getClasses();
         if ($this->data === null || $refresh === true) {
             exec(sprintf('php %s/mage.php %s', dirname(__FILE__), $this->getProject()->getRootFolder()), $output);
             $options = json_decode(implode('', $output), true);
