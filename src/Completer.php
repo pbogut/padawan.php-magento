@@ -53,7 +53,7 @@ class Completer implements CompleterInterface
     }
 
     protected function handleType($type) {
-        $result = Indexer::getInstance()->getGroup(Indexer::TYPE_RESURCE_MODEL);
+        $result = Indexer::getInstance()->getGroup($type);
 
         return array_map(function ($serviceName) {
             return new Entry(
