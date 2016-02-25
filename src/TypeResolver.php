@@ -68,7 +68,8 @@ class TypeResolver
         $chain = $e->getChain();
 
         $args = $chain->getArgs();
-        $firstArg = array_pop($args)->value;
+        $firstArg = array_pop($args);
+        $firstArg = $firstArg->value;
 
         if (!$firstArg instanceof String_) {
             return; //no string so bye bye
