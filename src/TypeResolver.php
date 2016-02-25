@@ -67,7 +67,8 @@ class TypeResolver
     protected function handleType($type, TypeResolveEvent $e, Project $project) {
         $chain = $e->getChain();
 
-        $firstArg = array_pop($chain->getArgs())->value;
+        $args = $chain->getArgs();
+        $firstArg = array_pop($args)->value;
 
         if (!$firstArg instanceof String_) {
             return; //no string so bye bye
