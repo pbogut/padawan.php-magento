@@ -70,7 +70,7 @@ class TypeResolver
         $firstArg = array_pop($chain->getArgs())->value;
 
         if (!$firstArg instanceof String_) {
-            break; //no string so bye bye
+            return; //no string so bye bye
         }
 
         $result = Indexer::getInstance()->getGroup($type);
