@@ -1,6 +1,6 @@
 <?php
 
-namespace Smeagol07\PadawanMagento;
+namespace Pbogut\PadawanMagento;
 
 use Parser\UseParser;
 use Complete\Resolver\TypeResolveEvent;
@@ -64,7 +64,8 @@ class TypeResolver
         return $this->parentType;
     }
 
-    protected function handleType($type, TypeResolveEvent $e, Project $project) {
+    protected function handleType($type, TypeResolveEvent $e, Project $project)
+    {
         $chain = $e->getChain();
 
         $args = $chain->getArgs();

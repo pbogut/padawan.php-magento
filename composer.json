@@ -1,9 +1,9 @@
 {
-    "name": "smeagol07/padawan-magento",
+    "name": "pbogut/padawan-magento",
     "description": "Magento plugin for padawan.php",
     "license": "MIT",
     "autoload": {
-        "psr-4": {"Smeagol07\\PadawanMagento\\": "src/"}
+        "psr-4": {"Pbogut\\PadawanMagento\\": "src/"}
     },
     "authors": [
         {

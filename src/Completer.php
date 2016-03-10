@@ -1,6 +1,6 @@
 <?php
 
-namespace Smeagol07\PadawanMagento;
+namespace Pbogut\PadawanMagento;
 
 use Complete\Completer\CompleterInterface;
 use Entity\Completion\Entry;
@@ -33,7 +33,8 @@ class Completer implements CompleterInterface
 
     }
 
-    protected function handleModel() {
+    protected function handleModel()
+    {
         $result = Indexer::getInstance()->getGroup(Indexer::TYPE_MODEL);
         $result = array_keys($result);
         $result = array_filter($result, function ($serviceName) use ($result) {
@@ -52,7 +53,8 @@ class Completer implements CompleterInterface
 
     }
 
-    protected function handleType($type) {
+    protected function handleType($type)
+    {
         $result = Indexer::getInstance()->getGroup($type);
 
         return array_map(function ($serviceName) {
@@ -64,6 +66,4 @@ class Completer implements CompleterInterface
             );
         }, array_keys($result));
     }
-
-
 }

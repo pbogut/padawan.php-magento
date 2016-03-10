@@ -1,6 +1,6 @@
 <?php
 
-namespace Smeagol07\PadawanMagento;
+namespace Pbogut\PadawanMagento;
 
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Complete\Resolver\NodeTypeResolver;
@@ -47,6 +47,7 @@ class Plugin
             // 'getStoreConfigFlag',
         ];
     }
+
     public function init()
     {
         $this->dispatcher->addListener(
@@ -70,12 +71,14 @@ class Plugin
             [$this->generator, 'handleAfterGenerationEvent']
         );
     }
+
     public function handleProjectLoadEvent($e)
     {
         $this->project = $e->project;
         // $data = $this->project->getPlugin('padawan-magento');
         Indexer::getInstance()->setProject($this->project);//->setData($data);
     }
+
     public function handleTypeResolveEvent($e)
     {
         $index = $this->project->getIndex();
@@ -83,6 +86,7 @@ class Plugin
             $this->resolver->handleTypeResolveEvent($e, $this->project);
         }
     }
+
     public function handleCompleteEvent($e)
     {
         $context = $e->context;
@@ -94,7 +98,8 @@ class Plugin
         }
     }
 
-    protected function checkFactoryMmethod($methodName) {
+    protected function checkFactoryMmethod($methodName)
+    {
         if (!$methodName) {
             return false;
         }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Smeagol07\PadawanMagento;
+namespace Pbogut\PadawanMagento;
 
 /**
  * I'm parsing Magento XML Files to generate completions
@@ -12,7 +12,8 @@ namespace Smeagol07\PadawanMagento;
  * in no time (ok it, can take few seconds), just for completion and type
  * resolve purpose.
  */
-class Indexer {
+class Indexer
+{
 
     const TYPE_HELPER = 'helpers';
     const TYPE_MODEL = 'models';
@@ -23,16 +24,19 @@ class Indexer {
     protected $data = null;
     protected $project = null;
 
-    public function setProject($project) {
+    public function setProject($project)
+    {
         $this->project = $project;
         return $this;
     }
 
-    public function getProject() {
+    public function getProject()
+    {
         return $this->project;
     }
 
-    public function setData($data) {
+    public function setData($data)
+    {
         if (empty($data)) {
             $data = null;
         }
@@ -40,7 +44,8 @@ class Indexer {
         return $this;
     }
 
-    public function getGroup($name) {
+    public function getGroup($name)
+    {
         $data = $this->getData();
         if (isset($data[$name])) {
             return $data[$name];
@@ -49,11 +54,13 @@ class Indexer {
         return array();
     }
 
-    public function refresh() {
+    public function refresh()
+    {
         $this->getData(true);
     }
 
-    public function getData($refresh = false) {
+    public function getData($refresh = false)
+    {
         $classMap = $this->getProject()->getIndex()->getClasses();
         if ($this->data === null || $refresh === true) {
             exec(sprintf('php %s/mage.php %s', dirname(__FILE__), $this->getProject()->getRootFolder()), $output);
@@ -63,9 +70,9 @@ class Indexer {
                 return $this->data;
             }
 
-            foreach([self::TYPE_HELPER, self::TYPE_RESURCE_MODEL, self::TYPE_MODEL] as $type) {
+            foreach ([self::TYPE_HELPER, self::TYPE_RESURCE_MODEL, self::TYPE_MODEL] as $type) {
                 $this->data[$type] = isset($this->data[$type]) ? $this->data[$type] : array();
-                uksort($options[$type], function($a, $b) {
+                uksort($options[$type], function ($a, $b) {
                     return ($a == $b) ? 0 : ($a > $b ? -1 : 1);
                 });
                 foreach ($options[$type] as $helperXmlKey => $namespace) {
@@ -85,9 +92,10 @@ class Indexer {
         return $this->data;
     }
 
-    protected function isClassInMaped($className) {
+    protected function isClassInMaped($className)
+    {
         $isInMap = false;
-        foreach ($this->data as $group => $classList) {
+        foreach ($this->data as $classList) {
             if (in_array($className, $classList)) {
                 $isInMap = true;
                 break;
@@ -97,7 +105,8 @@ class Indexer {
         return $isInMap;
     }
 
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (self::$_instance === null) {
             self::$_instance = new Indexer();
         }
@@ -105,7 +114,8 @@ class Indexer {
         return self::$_instance;
     }
 
-    protected function getFactoryName($helperXmlKey, $namespace, $className) {
+    protected function getFactoryName($helperXmlKey, $namespace, $className)
+    {
         $name = $helperXmlKey;
         $result = array();
         $classEnding = substr($className, strlen($namespace)+1);
@@ -120,6 +130,7 @@ class Indexer {
         return $name;
     }
 
-    protected function __construct() {}
-
+    protected function __construct()
+    {
+    }
 }

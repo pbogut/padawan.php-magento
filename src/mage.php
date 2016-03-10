@@ -1,41 +1,42 @@
 <?php
 
-function start($path, $file = null) {
+function start($path, $file = null)
+{
     $mageFile = "{$path}/app/Mage.php";
-    if(!file_exists($mageFile)) {
-        die(json_encode(array(
+    if (!file_exists($mageFile)) {
+        echo (json_encode(array(
             'success' => false,
             'message' => "Wrong magento path. File {$mageFile} not found."
         )));
-    }
-    require $mageFile;
-    Mage::app();
-    session_start();
-
-    $result = array();
-
-    if ($file === null) {
-        $config = Mage::getConfig()->loadModulesConfiguration('config.xml');
     } else {
-        $config = Mage::getConfig()->loadFile($file);
-    }
+        require $mageFile;
+        Mage::app();
+        session_start();
 
-    die(json_encode(array(
-        'success' => true,
-        'models' => handleModels($config),
-        'resource_models' => handleResources($config),
-        'helpers' => handleHelpers($config),
-    )));
+        if ($file === null) {
+            $config = Mage::getConfig()->loadModulesConfiguration('config.xml');
+        } else {
+            $config = Mage::getConfig()->loadFile($file);
+        }
+
+        echo (json_encode(array(
+            'success' => true,
+            'models' => handleModels($config),
+            'resource_models' => handleResources($config),
+            'helpers' => handleHelpers($config),
+        )));
+    }
 }
 
-function getDirContents($dir, &$results = array()){
+function getDirContents($dir, &$results = array())
+{
     $files = scandir($dir);
 
-    foreach($files as $key => $value){
+    foreach ($files as $value) {
         $path = realpath($dir.DIRECTORY_SEPARATOR.$value);
-        if(!is_dir($path)) {
+        if (!is_dir($path)) {
             $results[] = $path;
-        } else if($value != "." && $value != "..") {
+        } elseif ($value != "." && $value != "..") {
             getDirContents($path, $results);
             $results[] = $path;
         }
@@ -44,17 +45,18 @@ function getDirContents($dir, &$results = array()){
     return $results;
 }
 
-function arrayToString($array) {
+function arrayToString($array)
+{
     $output = array();
-    foreach($array as $key => $row) {
+    foreach ($array as $key => $row) {
         $output[] = "{$key}:{$row}";
     }
     return implode("\n", $output);
 }
 
-function handleModels($config) {
+function handleModels($config)
+{
     $resourceModels = array();
-    $models = array();
 
     foreach ($config->getNode()->xpath('global/models/*') as $element) {
         $name = $element->getName();
@@ -71,14 +73,36 @@ function handleModels($config) {
     return $resourceModels;
 }
 
-function handleDeprecatedResources($config) {
+function handleDeprecatedResources($config)
+{
     $resourceModels = array();
 
     foreach ($config->getNode()->xpath('global/models/*[resourceModel]') as $element) {
         $namespace = (string) current(
             $config->getNode()->xpath("global/models/{$element->resourceModel}/class")
         );
-        $depricated = (string) current(
+        /* $depricated = (string) current( */
+        /*     $config->getNode()->xpath("global/models/{$element->resourceModel}/class") */
+        /* ); */
+        if (!$namespace) {
+            continue;
+        }
+        $name = $element->getName();
+
+        $resourceModels[$name] = $namespace;
+    }
+
+    $resourceModels['core'] = 'Mage_Core_Model_Resource';
+
+    return $resourceModels;
+}
+
+function handleResources($config)
+{
+    $resourceModels = array();
+
+    foreach ($config->getNode()->xpath('global/models/*[resourceModel]') as $element) {
+        $namespace = (string) current(
             $config->getNode()->xpath("global/models/{$element->resourceModel}/class")
         );
         if (!$namespace) {
@@ -94,27 +118,8 @@ function handleDeprecatedResources($config) {
     return $resourceModels;
 }
 
-function handleResources($config) {
-    $resourceModels = array();
-
-    foreach ($config->getNode()->xpath('global/models/*[resourceModel]') as $element) {
-        $namespace = (string) current(
-            $config->getNode()->xpath("global/models/{$element->resourceModel}/class")
-        );
-        if (!$namespace) {
-            continue;
-        }
-        $name = $element->getName();
-
-        $resourceModels[$name] = $namespace;
-    }
-
-    $resourceModels['core'] = 'Mage_Core_Model_Resource';
-
-    return $resourceModels;
-}
-
-function handleHelpers($config) {
+function handleHelpers($config)
+{
     foreach ($config->getNode('global/helpers')->asArray() as $name => $data) {
         if (isset($data['class'])) {
             $helpers[$name] = $data['class'];

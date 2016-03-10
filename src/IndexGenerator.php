@@ -1,6 +1,6 @@
 <?php
 
-namespace Smeagol07\PadawanMagento;
+namespace Pbogut\PadawanMagento;
 
 class IndexGenerator
 {
