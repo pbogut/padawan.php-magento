@@ -13,12 +13,16 @@ class TypeResolver
 {
     /** @var UseParser */
     private $useParser;
+    /** @var MageAdapter */
+    private $mageAdapter;
     private $parentType;
 
     public function __construct(
-        UseParser $useParser
+        UseParser $useParser,
+        MageAdapter $mageAdapter
     ) {
         $this->useParser = $useParser;
+        $this->mageAdapter = $mageAdapter;
     }
 
     public function handleParentTypeEvent(TypeResolveEvent $e)
@@ -33,22 +37,22 @@ class TypeResolver
         $chain = $e->getChain();
         //tiny hackish solution to reindex Magento XML files
         if ($chain->getType() === 'method' && $chain->getName() == 'padawan_refresh') {
-            Indexer::getInstance()->refresh();
+            $this->mageAdapter->refresh();
         }
         $args = $chain->getArgs();
         if ($chain->getType() === 'method' && count($args) > 0) {
             switch ($chain->getName()) {
                 case 'helper': //Mage::helper()
-                    $this->handleType(Indexer::TYPE_HELPER, $e, $project);
+                    $this->handleType(MageAdapter::TYPE_HELPER, $e, $project);
                     break;
                 case 'getSingleton': //Mage::getSingleton()
                     //no break;
                 case 'getModel': //Mage::gerModel()
-                    $this->handleType(Indexer::TYPE_MODEL, $e, $project);
+                    $this->handleType(MageAdapter::TYPE_MODEL, $e, $project);
                     break;
                 break;
                 case 'getResourceModel': //Mage::gerResourceModel()
-                    $this->handleType(Indexer::TYPE_RESURCE_MODEL, $e, $project);
+                    $this->handleType(MageAdapter::TYPE_RESURCE_MODEL, $e, $project);
                     break;
                 case 'getStoreConfig': //Mage::getStoreConfig()
                     //no break;
@@ -76,7 +80,7 @@ class TypeResolver
             return; //no string so bye bye
         }
 
-        $result = Indexer::getInstance()->getGroup($type);
+        $result = $this->mageAdapter->getGroup($type);
 
         $helperName = $firstArg->value;
 
