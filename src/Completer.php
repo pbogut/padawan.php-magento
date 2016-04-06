@@ -42,35 +42,33 @@ class Completer implements CompleterInterface
 
     protected function handleModel()
     {
-        $result = $this->mageAdapter->getGroup(MageAdapter::TYPE_MODEL);
-        $result = array_keys($result);
-        $result = array_filter($result, function ($serviceName) use ($result) {
+        $group= $this->mageAdapter->getGroup(MageAdapter::TYPE_MODEL);
+        $data = array_keys($group);
+        $data = array_filter($data, function ($serviceName) use ($data) {
             //skip depricated nodes, type still will be resolved
             return (strpos($serviceName, '/mysql4') === false);
         });
-
-        return array_map(function ($serviceName) {
+        return array_map(function ($serviceName) use ($group) {
             return new Entry(
                 sprintf('\'%s\'', $serviceName),
-                '',
+                $group[$serviceName],
                 '',
                 $serviceName
             );
-        }, $result);
+        }, $data);
 
     }
 
     protected function handleType($type)
     {
-        $result = $this->mageAdapter->getGroup($type);
-
-        return array_map(function ($serviceName) {
+        $group = $this->mageAdapter->getGroup($type);
+        return array_map(function ($serviceName)  use ($group){
             return new Entry(
                 sprintf('\'%s\'', $serviceName),
-                '',
+                $group[$serviceName],
                 '',
                 $serviceName
             );
-        }, array_keys($result));
+        }, array_keys($group));
     }
 }

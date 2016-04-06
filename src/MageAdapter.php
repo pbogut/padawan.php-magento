@@ -71,9 +71,6 @@ class MageAdapter
 
         foreach ([self::TYPE_HELPER, self::TYPE_RESURCE_MODEL, self::TYPE_MODEL] as $type) {
             $this->data[$type] = isset($this->data[$type]) ? $this->data[$type] : array();
-            uksort($options[$type], function ($a, $b) {
-                return ($a == $b) ? 0 : ($a < $b ? -1 : 1);
-            });
             //@todo that part needs to be optimized
             foreach ($options[$type] as $helperXmlKey => $namespace) {
                 foreach ($classMap as $className => $_) {
@@ -88,7 +85,19 @@ class MageAdapter
             }
         }
 
+        $this->sortData();
+
         $this->mageClassInitiaed = true;
+    }
+
+    protected function sortData() {
+        foreach ([self::TYPE_HELPER, self::TYPE_RESURCE_MODEL, self::TYPE_MODEL] as $type) {
+            uksort($this->data[$type], function ($a, $b) {
+                $a = strtolower($a);
+                $b = strtolower($b);
+                return ($a == $b) ? 0 : ($a < $b ? -1 : 1);
+            });
+        }
     }
 
     protected function getFactoryName($helperXmlKey, $namespace, $className)
@@ -188,7 +197,9 @@ class MageAdapter
                 $helpers[$name] = $data['class'];
             }
         }
-        $helpers['core'] = 'Mage_Core_Helper'; //for some reason its not in magento config files
+        //for some reason these are not in magento config files
+        $helpers['core'] = 'Mage_Core_Helper';
+        $helpers['adminhtml'] = 'Mage_Adminhtml_Helper';
 
         return $helpers;
     }
