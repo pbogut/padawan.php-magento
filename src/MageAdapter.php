@@ -23,7 +23,10 @@ class MageAdapter
     }
 
     //@todo get rid of it
-    public function refresh() { }
+    public function refresh()
+    {
+        $this->rebuildData();
+    }
 
     public function getGroup($groupName)
     {
@@ -61,19 +64,20 @@ class MageAdapter
             $config = \Mage::getConfig()->loadFile($file);
         }
 
+        $classMap = $this->project->getIndex()->getClasses();
+
         $options = [
             'models' => $this->handleModels($config),
             'resource_models' => $this->handleResources($config),
-            'helpers' => $this->handleHelpers($config),
+            'helpers' => $this->handleHelpers($config, $classMap),
         ];
-
-        $classMap = $this->project->getIndex()->getClasses();
 
         foreach ([self::TYPE_HELPER, self::TYPE_RESURCE_MODEL, self::TYPE_MODEL] as $type) {
             $this->data[$type] = isset($this->data[$type]) ? $this->data[$type] : array();
             //@todo that part needs to be optimized
-            foreach ($options[$type] as $helperXmlKey => $namespace) {
-                foreach ($classMap as $className => $_) {
+
+            foreach ($classMap as $className => $_) {
+                foreach ($options[$type] as $helperXmlKey => $namespace) {
                     if (!$namespace) {
                         continue;
                     }
@@ -90,7 +94,8 @@ class MageAdapter
         $this->mageClassInitiaed = true;
     }
 
-    protected function sortData() {
+    protected function sortData()
+    {
         foreach ([self::TYPE_HELPER, self::TYPE_RESURCE_MODEL, self::TYPE_MODEL] as $type) {
             uksort($this->data[$type], function ($a, $b) {
                 $a = strtolower($a);
@@ -104,7 +109,7 @@ class MageAdapter
     {
         $name = $helperXmlKey;
         $result = array();
-        $classEnding = substr($className, strlen($namespace)+1);
+        $classEnding = substr($className, strlen($namespace) + 1);
         foreach (explode('_', $classEnding) as $part) {
             $result[] = lcfirst($part);
         }
@@ -190,16 +195,23 @@ class MageAdapter
         return $resourceModels;
     }
 
-    protected function handleHelpers($config)
+    protected function handleHelpers($config, $classMap)
     {
         foreach ($config->getNode('global/helpers')->asArray() as $name => $data) {
             if (isset($data['class'])) {
                 $helpers[$name] = $data['class'];
             }
         }
-        //for some reason these are not in magento config files
-        $helpers['core'] = 'Mage_Core_Helper';
-        $helpers['adminhtml'] = 'Mage_Adminhtml_Helper';
+
+        //for some reason not all magento helpers are defined in xml's
+        $classList  = array_keys($classMap);
+        foreach ($classList as $className) {
+            preg_match('/^(Mage_([A-Za-z0-9]+)_Helper)_.*$/', $className, $matches);
+            if (count($matches) === 3) {
+                $name = strtolower($matches[2]);
+                $helpers[$name] = (string) $matches[1];
+            }
+        }
 
         return $helpers;
     }

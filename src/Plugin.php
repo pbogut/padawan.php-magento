@@ -2,13 +2,11 @@
 
 namespace Pbogut\PadawanMagento;
 
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Complete\Resolver\NodeTypeResolver;
 use Complete\Completer\CompleterFactory;
-use Generator\IndexGenerator as Generator;
-use Parser\UseParser;
+use Complete\Resolver\NodeTypeResolver;
 use Entity\FQCN;
-use Entity\Node\ClassData;
+use Generator\IndexGenerator as Generator;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Plugin
 {
@@ -83,10 +81,8 @@ class Plugin
             [$this->generator, 'handleAfterGenerationEvent']
         );
 
-
         $this->project = $e->project;
         // $data = $this->project->getPlugin('padawan-magento');
-        /* Indexer::getInstance()->setProject($this->project);//->setData($data); */
         $this->mageAdapter->setProject($e->project);
     }
 
@@ -136,7 +132,8 @@ class Plugin
 
     protected function isMagentoProject($project)
     {
-        $classList = array_keys($project->getIndex()->getClasses());
+        $classes = $project->getIndex()->getClasses();
+        $classList = array_keys($classes);
 
         return in_array('Mage', $classList);
     }
