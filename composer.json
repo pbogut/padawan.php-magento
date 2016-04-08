@@ -1,6 +1,7 @@
 {
     "name": "pbogut/padawan-magento",
     "description": "Magento plugin for padawan.php",
+    "homepage": "https://github.com/pbogut/padawan.php-magento",
     "license": "MIT",
     "autoload": {
         "psr-4": {"Pbogut\\PadawanMagento\\": "src/"}
@@ -8,7 +9,9 @@
     "authors": [
         {
             "name": "Pawel Bogut",
-            "email": "pawel.bogut@gmail.com"
+            "email": "pawel.bogut@gmail.com",
+            "homepage": "http://pbogut.me",
+            "role": "Developer"
         }
     ],
     "require": {}
