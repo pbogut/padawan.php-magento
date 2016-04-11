@@ -2,13 +2,11 @@
 
 namespace Pbogut\PadawanMagento;
 
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Complete\Resolver\NodeTypeResolver;
 use Complete\Completer\CompleterFactory;
-use Generator\IndexGenerator as Generator;
-use Parser\UseParser;
+use Complete\Resolver\NodeTypeResolver;
 use Entity\FQCN;
-use Entity\Node\ClassData;
+use Generator\IndexGenerator as Generator;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Plugin
 {
@@ -20,6 +18,8 @@ class Plugin
     private $dispatcher;
     /** @var IndexGenerator */
     private $generator;
+    /** @war MageAdapter */
+    private $mageAdapter;
 
     private $factoryMethods;
     private $containerNames;
@@ -29,12 +29,14 @@ class Plugin
         EventDispatcher $dispatcher,
         TypeResolver $resolver,
         Completer $completer,
-        IndexGenerator $generator
+        IndexGenerator $generator,
+        MageAdapter $mageAdapter
     ) {
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
         $this->completer = $completer;
         $this->generator = $generator;
+        $this->mageAdapter = $mageAdapter;
         $this->containerNames = [
             'Mage',
         ];
@@ -51,12 +53,20 @@ class Plugin
     public function init()
     {
         $this->dispatcher->addListener(
-            NodeTypeResolver::BLOCK_START,
-            [$this->resolver, 'handleParentTypeEvent']
-        );
-        $this->dispatcher->addListener(
             'project.load',
             [$this, 'handleProjectLoadEvent']
+        );
+    }
+
+    public function handleProjectLoadEvent($e)
+    {
+        //if not a magento project, then there is nothing to do
+        if (!$this->isMagentoProject($e->project)) {
+            return;
+        }
+        $this->dispatcher->addListener(
+            NodeTypeResolver::BLOCK_START,
+            [$this->resolver, 'handleParentTypeEvent']
         );
         $this->dispatcher->addListener(
             NodeTypeResolver::BLOCK_END,
@@ -70,13 +80,10 @@ class Plugin
             Generator::BEFORE_GENERATION,
             [$this->generator, 'handleAfterGenerationEvent']
         );
-    }
 
-    public function handleProjectLoadEvent($e)
-    {
         $this->project = $e->project;
         // $data = $this->project->getPlugin('padawan-magento');
-        Indexer::getInstance()->setProject($this->project);//->setData($data);
+        $this->mageAdapter->setProject($e->project);
     }
 
     public function handleTypeResolveEvent($e)
@@ -121,5 +128,13 @@ class Plugin
             return true;
         }
         return false;
+    }
+
+    protected function isMagentoProject($project)
+    {
+        $classes = $project->getIndex()->getClasses();
+        $classList = array_keys($classes);
+
+        return in_array('Mage', $classList);
     }
 }

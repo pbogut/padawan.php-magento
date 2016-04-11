@@ -9,6 +9,13 @@ use Entity\Completion\Context;
 
 class Completer implements CompleterInterface
 {
+    /** @var MageAdapter */
+    private $mageAdapter;
+
+    public function __construct(MageAdapter $mageAdapter)
+    {
+        $this->mageAdapter = $mageAdapter;
+    }
 
     public function getEntries(Project $project, Context $context)
     {
@@ -17,13 +24,13 @@ class Completer implements CompleterInterface
 
         switch ($methodName) {
             case 'helper':
-                return $this->handleType(Indexer::TYPE_HELPER);
+                return $this->handleType(MageAdapter::TYPE_HELPER);
             case 'getSingleton': //Mage::getSingleton()
                 //no break;
             case 'getModel': //Mage::gerModel()
                 return $this->handleModel();
             case 'getResourceModel': //Mage::gerResourceModel()
-                return $this->handleType(Indexer::TYPE_RESURCE_MODEL);
+                return $this->handleType(MageAdapter::TYPE_RESURCE_MODEL);
             case 'getStoreConfig': //Mage::getStoreConfig()
                 //no break;
             case 'getStoreConfigFlag': //Mage::getStoreConfigFlag()
@@ -35,35 +42,33 @@ class Completer implements CompleterInterface
 
     protected function handleModel()
     {
-        $result = Indexer::getInstance()->getGroup(Indexer::TYPE_MODEL);
-        $result = array_keys($result);
-        $result = array_filter($result, function ($serviceName) use ($result) {
+        $group= $this->mageAdapter->getGroup(MageAdapter::TYPE_MODEL);
+        $data = array_keys($group);
+        $data = array_filter($data, function ($serviceName) use ($data) {
             //skip depricated nodes, type still will be resolved
             return (strpos($serviceName, '/mysql4') === false);
         });
-
-        return array_map(function ($serviceName) {
+        return array_map(function ($serviceName) use ($group) {
             return new Entry(
                 sprintf('\'%s\'', $serviceName),
-                '',
+                $group[$serviceName],
                 '',
                 $serviceName
             );
-        }, $result);
+        }, $data);
 
     }
 
     protected function handleType($type)
     {
-        $result = Indexer::getInstance()->getGroup($type);
-
-        return array_map(function ($serviceName) {
+        $group = $this->mageAdapter->getGroup($type);
+        return array_map(function ($serviceName)  use ($group){
             return new Entry(
                 sprintf('\'%s\'', $serviceName),
-                '',
+                $group[$serviceName],
                 '',
                 $serviceName
             );
-        }, array_keys($result));
+        }, array_keys($group));
     }
 }
