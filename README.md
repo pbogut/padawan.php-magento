@@ -14,8 +14,7 @@ without any warranty. Use it at your own risk. Said that I'm using it every
 day for Magento development and so can you.
 
 ## Demo
-
-Coming soon...
+![demo](https://raw.githubusercontent.com/pbogut/padawan.php-magento/master/demo.gif)
 
 ## Instalation
 
