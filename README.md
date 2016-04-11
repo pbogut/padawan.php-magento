@@ -16,7 +16,7 @@ day for Magento development and so can you.
 ## Demo
 ![demo](https://raw.githubusercontent.com/pbogut/padawan.php-magento/master/demo.gif)
 
-## Instalation
+## Installation
 
 The plugin can be install by the composer:
 `composer.phar global require pbogut/padawan-magento`
@@ -29,7 +29,7 @@ project padawan may complain about `vendor/composer/autoload_classmap.php`.
 In that case its enough if you create that file and return empty array inside:
 `echo '<?php return [];' > ./vendor/completion/autoload_classmap.php`
 
-## How it works
+## How it works?
 
 When you use it for the first time in your project, the plugin will check XML files
 by using `Mage` class. That may take few seconds, so completion may not work
