@@ -37,7 +37,7 @@ class MageAdapter
 
     protected function initMage()
     {
-        if (!$this->mageClassInitiaed) {
+        if (!$this->mageClassInitiated) {
             $this->requireMageClass();
             \Mage::app();
             $this->rebuildData();
