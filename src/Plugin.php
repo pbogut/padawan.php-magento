@@ -99,7 +99,12 @@ class Plugin
         $context = $e->context;
         if ($context->isMethodCall()) {
             list($type, $isThis, $types, $workingNode) = $context->getData();
-            if (isset($workingNode->name) && $this->checkFactoryMmethod($workingNode->name) && $this->checkForContainerClass(array_pop($types), $e->project->getIndex())) {
+            if (isset($workingNode->name)
+                && $this->checkFactoryMmethod($workingNode->name)
+                && $this->checkForContainerClass(
+                    array_pop($types), $e->project->getIndex()
+                )
+            ) {
                 $e->completer = $this->completer;
             }
         }
