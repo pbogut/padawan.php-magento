@@ -10,6 +10,7 @@ class MageAdapter
     const TYPE_MODEL = 'models';
     const TYPE_RESURCE_MODEL = 'resource_models';
 
+    /** @var $project Project **/
     private $project = null;
     private $mageClassRequired = false;
     private $mageClassInitiated = false;
@@ -28,10 +29,28 @@ class MageAdapter
         $this->rebuildData();
     }
 
+    /**
+     * Check for flag file, if creted reload Magento xml data
+     * @return boolean
+     */
+    public function checkXmlUpdate()
+    {
+        $rootFolder = $this->project->getRootFolder();
+        $flagFile = "{$rootFolder}/.padawan/magento_reload_xml";
+        if (!file_exists($flagFile)) {
+            return false;
+        }
+
+        $this->rebuildData();
+        unlink($flagFile);
+
+        return true;
+    }
+
     public function getGroup($groupName)
     {
         $this->initMage();
-
+        $this->checkXmlUpdate();
         return isset($this->data[$groupName]) ? $this->data[$groupName] : [];
     }
 
@@ -56,13 +75,9 @@ class MageAdapter
         }
     }
 
-    protected function rebuildData($file = null)
+    protected function rebuildData()
     {
-        if ($file === null) {
-            $config = \Mage::getConfig()->loadModulesConfiguration('config.xml');
-        } else {
-            $config = \Mage::getConfig()->loadFile($file);
-        }
+        $config = \Mage::getConfig()->loadModulesConfiguration('config.xml');
 
         $classMap = $this->project->getIndex()->getClasses();
 
