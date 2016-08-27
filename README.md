@@ -36,11 +36,18 @@ by using `Mage` class. That may take few seconds, so completion may not work
 with the first usage.
 
 Currently, padawan does not support custom actions for plugins so there is no
-easy way to detect XML file changes. To get up to date with completion for
+easy way to detect XML file changes. ~~To get up to date with completion for
 Magento (ie. when XML file is changed, or new extension added) padawan
 server need to be restarted. The plugin is also implementing the hackish way to
-rebuild data when you type `Mage::padawan_refresh(` in any PHP file.
+rebuild data when you type `Mage::padawan_refresh(` in any PHP file.~~
+However, the plugin is checking for flag file in a `.padawan` directory in
+a project root. If there is `magento_reload_xml` file plugin will refresh data
+from Magento XML files.
 
+This can be automated by an editor. Below example for Vim:
+```vim
+:autocmd BufWritePre *.xml :silent! !touch .padawan/magento_reload_xml
+```
 ## License
 MIT
 
