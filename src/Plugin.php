@@ -20,6 +20,8 @@ class Plugin
     private $generator;
     /** @war MageAdapter */
     private $mageAdapter;
+    /** @var Helper */
+    private $helper;
 
     private $factoryMethods;
     private $containerNames;
@@ -30,13 +32,15 @@ class Plugin
         TypeResolver $resolver,
         Completer $completer,
         IndexGenerator $generator,
-        MageAdapter $mageAdapter
+        MageAdapter $mageAdapter,
+        Helper $helper
     ) {
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
         $this->completer = $completer;
         $this->generator = $generator;
         $this->mageAdapter = $mageAdapter;
+        $this->helper = $helper;
         $this->containerNames = [
             'Mage',
         ];
@@ -99,18 +103,33 @@ class Plugin
         $context = $e->context;
         if ($context->isMethodCall()) {
             list($type, $isThis, $types, $workingNode) = $context->getData();
-            if (isset($workingNode->name)
-                && $this->checkFactoryMmethod($workingNode->name)
-                && $this->checkForContainerClass(
-                    array_pop($types), $e->project->getIndex()
-                )
+            // This is kind a workaround, for some reason types are empty
+            // and workingNode is not function call when assaigning variable
+            // even if (in my opinon) it shoud be (at this event at least).
+            // Eg. $model = Mage::getModel( // I would expect this event to be
+            // aware that completion should be provided for getModel function,
+            // instead its getting useless information about var assign.
+            // Unless I'm missing something here...
+            $workingNode = $this->helper->findStaticCallNode($workingNode);
+            $fqcm = end($types);
+            if ($this->checkForContainerClass($fqcm)
+                && $this->shouldComplete($workingNode)
             ) {
                 $e->completer = $this->completer;
             }
         }
     }
 
-    protected function checkFactoryMmethod($methodName)
+    protected function shouldComplete($workingNode)
+    {
+        return $workingNode instanceof \PhpParser\Node\Expr\StaticCall
+            && (string) $workingNode->name
+            && $this->checkFactoryMethod($workingNode->name)
+            && ($className = end($workingNode->class->parts))
+            && in_array($className, $this->containerNames);
+    }
+
+    protected function checkFactoryMethod($methodName)
     {
         if (!$methodName) {
             return false;
@@ -124,7 +143,7 @@ class Plugin
         return false;
     }
 
-    protected function checkForContainerClass($fqcn, $index)
+    protected function checkForContainerClass($fqcn)
     {
         if (!$fqcn instanceof FQCN) {
             return false;

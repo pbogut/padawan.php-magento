@@ -11,15 +11,20 @@ class Completer implements CompleterInterface
 {
     /** @var MageAdapter */
     private $mageAdapter;
+    /** @var Helper */
+    private $helper;
 
-    public function __construct(MageAdapter $mageAdapter)
+    public function __construct(MageAdapter $mageAdapter, Helper $helper)
     {
         $this->mageAdapter = $mageAdapter;
+        $this->helper = $helper;
     }
 
     public function getEntries(Project $project, Context $context)
     {
         list($type, $isThis, $types, $workingNode) = $context->getData();
+        // @see Plugin::handleCompleteEvent
+        $workingNode = $this->helper->findStaticCallNode($workingNode);
         $methodName = $workingNode->name;
 
         switch ($methodName) {
@@ -38,6 +43,7 @@ class Completer implements CompleterInterface
                 break;
         }
 
+        return [];
     }
 
     protected function handleModel()
