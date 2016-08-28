@@ -35,10 +35,6 @@ class TypeResolver
     {
         /** @var \Entity\Chain\MethodCall */
         $chain = $e->getChain();
-        //tiny hackish solution to reindex Magento XML files
-        if ($chain->getType() === 'method' && $chain->getName() == 'padawan_refresh') {
-            $this->mageAdapter->refresh();
-        }
         $args = $chain->getArgs();
         if ($chain->getType() === 'method' && count($args) > 0) {
             switch ($chain->getName()) {
