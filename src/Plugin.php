@@ -60,14 +60,6 @@ class Plugin
             'project.load',
             [$this, 'handleProjectLoadEvent']
         );
-    }
-
-    public function handleProjectLoadEvent($e)
-    {
-        //if not a magento project, then there is nothing to do
-        if (!$this->isMagentoProject($e->project)) {
-            return;
-        }
         $this->dispatcher->addListener(
             NodeTypeResolver::BLOCK_START,
             [$this->resolver, 'handleParentTypeEvent']
@@ -84,6 +76,14 @@ class Plugin
             Generator::BEFORE_GENERATION,
             [$this->generator, 'handleAfterGenerationEvent']
         );
+    }
+
+    public function handleProjectLoadEvent($e)
+    {
+        //if not a magento project, then there is nothing to do
+        if (!$this->isMagentoProject($e->project)) {
+            return;
+        }
 
         $this->project = $e->project;
         // $data = $this->project->getPlugin('padawan-magento');
@@ -92,6 +92,9 @@ class Plugin
 
     public function handleTypeResolveEvent($e)
     {
+        if (!$this->project) {
+            return;
+        }
         $index = $this->project->getIndex();
         if ($this->checkForContainerClass($this->resolver->getParentType(), $index)) {
             $this->resolver->handleTypeResolveEvent($e, $this->project);
@@ -100,6 +103,9 @@ class Plugin
 
     public function handleCompleteEvent($e)
     {
+        if (!$this->project) {
+            return;
+        }
         $context = $e->context;
         if ($context->isMethodCall()) {
             list($type, $isThis, $types, $workingNode) = $context->getData();
