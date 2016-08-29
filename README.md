@@ -15,6 +15,7 @@ day for Magento development and so can you.
 
 ## Demo
 ![demo](https://raw.githubusercontent.com/pbogut/padawan.php-magento/master/demo.gif)
+![demo2](https://raw.githubusercontent.com/pbogut/padawan.php-magento/master/demo2.gif)
 
 ## Installation
 
