@@ -1,5 +1,6 @@
 # Magento plugin for Padawan.php
-==============================
+
+[![Join the chat at https://gitter.im/pbogut/padawan.php-magento](https://badges.gitter.im/pbogut/padawan.php-magento.svg)](https://gitter.im/pbogut/padawan.php-magento)
 
 A Magento plugin for [padawan.php completion server](https://github.com/mkusher/padawan.php).
 Adds factory names completion when ones using `Mage::helper()`,
