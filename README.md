@@ -1,5 +1,6 @@
 # Magento plugin for Padawan.php
 
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Join the chat at https://gitter.im/pbogut/padawan.php-magento](https://badges.gitter.im/pbogut/padawan.php-magento.svg)](https://gitter.im/pbogut/padawan.php-magento)
 
 A Magento plugin for [padawan.php completion server](https://github.com/mkusher/padawan.php).
