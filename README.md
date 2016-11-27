@@ -19,6 +19,11 @@ day for Magento development and so can you.
 ![demo](https://raw.githubusercontent.com/pbogut/padawan.php-magento/master/demo.gif)
 ![demo2](https://raw.githubusercontent.com/pbogut/padawan.php-magento/master/demo2.gif)
 
+## Requirments
+
+Plugin is working with stable version of `padawan.php` (currently `v0.2.1`). In the master version
+plugins are not loaded, see [#62](https://github.com/mkusher/padawan.php/issues/62).
+
 ## Installation
 
 The plugin can be install by the composer:
